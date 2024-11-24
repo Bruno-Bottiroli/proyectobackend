@@ -2,18 +2,18 @@ const express = require('express');
 const fs = require('fs');
 const router = express.Router();
 
-// Leer archivo JSON
+
 const readProducts = () => {
     const data = fs.readFileSync('./src/data/products.json', 'utf-8');
     return JSON.parse(data);
 };
 
-// Guardar archivo JSON
+
 const writeProducts = (products) => {
     fs.writeFileSync('./src/data/products.json', JSON.stringify(products, null, 2));
 };
 
-// Obtener todos los productos (con limitación opcional)
+
 router.get('/', (req, res) => {
     const { limit } = req.query;
     const products = readProducts();
@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
     res.json(products);
 });
 
-// Agregar un nuevo producto
+
 router.post('/', (req, res) => {
     const { title, description, code, price, status = true, stock, category, thumbnails = [] } = req.body;
 
@@ -49,7 +49,7 @@ router.post('/', (req, res) => {
     res.status(201).json(newProduct);
 });
 
-// Actualizar un producto
+
 router.put('/:pid', (req, res) => {
     const { pid } = req.params;
     const { title, description, code, price, status, stock, category, thumbnails = [] } = req.body;
@@ -65,7 +65,7 @@ router.put('/:pid', (req, res) => {
         return res.status(404).send('Producto no encontrado');
     }
 
-    // No se puede modificar el id
+    
     const updatedProduct = {
         ...products[productIndex],
         title,
@@ -84,7 +84,7 @@ router.put('/:pid', (req, res) => {
     res.json(updatedProduct);
 });
 
-// Eliminar un producto
+
 router.delete('/:pid', (req, res) => {
     const { pid } = req.params;
 
@@ -101,7 +101,7 @@ router.delete('/:pid', (req, res) => {
     res.status(200).send('Producto eliminado');
 });
 
-// Obtener un producto por su id
+
 router.get('/:pid', (req, res) => {
     const { pid } = req.params;
 

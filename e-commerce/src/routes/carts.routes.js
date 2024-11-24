@@ -2,18 +2,18 @@ const express = require('express');
 const fs = require('fs');
 const router = express.Router();
 
-// Leer archivo JSON
+
 const readCarts = () => {
     const data = fs.readFileSync('./src/data/carts.json', 'utf-8');
     return JSON.parse(data);
 };
 
-// Guardar archivo JSON
+
 const writeCarts = (carts) => {
     fs.writeFileSync('./src/data/carts.json', JSON.stringify(carts, null, 2));
 };
 
-// Crear un nuevo carrito
+
 router.post('/', (req, res) => {
     const carts = readCarts();
     const newCart = {
@@ -26,7 +26,7 @@ router.post('/', (req, res) => {
     res.status(201).json(newCart);
 });
 
-// Obtener los productos de un carrito
+
 router.get('/:cid', (req, res) => {
     const { cid } = req.params;
     const carts = readCarts();
@@ -39,7 +39,7 @@ router.get('/:cid', (req, res) => {
     res.json(cart.products);
 });
 
-// Agregar un producto a un carrito
+
 router.post('/:cid/product/:pid', (req, res) => {
     const { cid, pid } = req.params;
     const { quantity = 1 } = req.body;
@@ -55,7 +55,7 @@ router.post('/:cid/product/:pid', (req, res) => {
     const productInCart = cart.products.find(p => p.product === pid);
 
     if (productInCart) {
-        productInCart.quantity += quantity;  // Incrementa la cantidad si ya existe
+        productInCart.quantity += quantity;  
     } else {
         cart.products.push(product);
     }
