@@ -1,0 +1,16 @@
+{
+  "name": "proyecto-backend",
+  "version": "1.0.0",
+  "description": "primer proyecto backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bruno Bottiroli",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1",
+    "fs": "^0.0.1-security",
+    "moment": "^2.30.1"
+  }
+}
