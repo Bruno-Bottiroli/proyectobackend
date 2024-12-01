@@ -1,5 +1,6 @@
-const express = require('express');
-const fs = require('fs');
+import express from "express"
+import fs from "fs"
+
 const router = express.Router();
 
 
@@ -115,4 +116,4 @@ router.get('/:pid', (req, res) => {
     res.json(product);
 });
 
-module.exports = router;
+export default router

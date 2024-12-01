@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "title": "remera deportiva",
+    "description": "ropa deportiva",
+    "code": 345,
+    "price": 2000,
+    "status": true,
+    "stock": 3,
+    "category": "ropa",
+    "thumbnails": ""
+  }
+]
