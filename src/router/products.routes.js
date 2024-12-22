@@ -1,119 +1,87 @@
 import express from "express"
-import fs from "fs"
+import { ProductDao } from "../dao/mongoDao/products.dao.js";
+
 
 const router = express.Router();
 
 
-const readProducts = () => {
-    const data = fs.readFileSync('./src/data/products.json', 'utf-8');
-    return JSON.parse(data);
-};
+router.get('/', async (req, res) => {
+    const { limit, page, sort, status, category } = req.query;
+    try {
+        const options= {
+            limit : limit || 10,
+            page: page || 1,
+            sort: {
+                price: sort === "asc" ? 1 : -1,
+            },
+            lean: true,
+        }
+        let filters = {};
+        if (status) {
+            filters.status = status === "true"
+        }
+        if (category) {
+            filters.category = category
+        }
+        const products = await ProductDao.getAll(filters, options)
 
-
-const writeProducts = (products) => {
-    fs.writeFileSync('./src/data/products.json', JSON.stringify(products, null, 2));
-};
-
-
-router.get('/', (req, res) => {
-    const { limit } = req.query;
-    const products = readProducts();
-    if (limit) {
-        return res.json(products.slice(0, parseInt(limit)));
+        res.json({ status: "ok", payload: products });
+    } catch (error) {
+        console.log(error);
+        res.json({ status: "error", message: "An error occurred while fetching products" });
     }
-    res.json(products);
 });
 
 
-router.post('/', (req, res) => {
-    const { title, description, code, price, status = true, stock, category, thumbnails = [] } = req.body;
+router.post('/', async (req, res) => {
+    const body = req.body;
 
-    if (!title || !description || !code || !price || stock == null || !category) {
-        return res.status(400).send('Todos los campos son obligatorios, excepto thumbnails');
-    }
-
-    const products = readProducts();
-    const newProduct = {
-        id: products.length > 0 ? products[products.length - 1].id + 1 : 1,
-        title,
-        description,
-        code,
-        price,
-        status,
-        stock,
-        category,
-        thumbnails
-    };
-
-    products.push(newProduct);
-    writeProducts(products);
-    res.status(201).json(newProduct);
+   try {
+    const product = await ProductDao.create(body)
+    res.json({ status: "ok" , payload: product })
+   } catch (error) {
+        console.log(error)
+   }
 });
 
 
-router.put('/:pid', (req, res) => {
+router.put('/:pid', async(req, res) => {
     const { pid } = req.params;
-    const { title, description, code, price, status, stock, category, thumbnails = [] } = req.body;
-
-    if (!title || !description || !code || !price || stock == null || !category) {
-        return res.status(400).send('Todos los campos son obligatorios, excepto thumbnails');
+    const body = req.body
+    try {
+        const findproduct = await ProductDao.getById(pid)
+        if(!findproduct) return res.json({status: error, message: `product id ${pid} not found` })
+        const product = await ProductDao.update(pid, body)
+        res.json({ status: "ok" , payload: product })
+    } catch (error) {
+        console.log(error)
     }
+});
 
-    const products = readProducts();
-    const productIndex = products.findIndex(product => product.id === parseInt(pid));
 
-    if (productIndex === -1) {
-        return res.status(404).send('Producto no encontrado');
+router.delete('/:pid', async(req, res) => {
+    const { pid } = req.params;
+    try {
+        const findproduct = await ProductDao.getById(pid)
+        if(!findproduct) return res.json({status: error, message: `product id ${pid} not found` })
+        const product = await ProductDao.delete(pid)
+        res.json({ status: "eliminado" , message: `product id ${pid} deleted` })
+    } catch (error) {
+        console.log(error)
     }
-
     
-    const updatedProduct = {
-        ...products[productIndex],
-        title,
-        description,
-        code,
-        price,
-        status: status !== undefined ? status : products[productIndex].status,
-        stock,
-        category,
-        thumbnails
-    };
-
-    products[productIndex] = updatedProduct;
-    writeProducts(products);
-
-    res.json(updatedProduct);
 });
 
 
-router.delete('/:pid', (req, res) => {
+router.get('/:pid', async(req, res) => {
     const { pid } = req.params;
-
-    const products = readProducts();
-    const productIndex = products.findIndex(product => product.id === parseInt(pid));
-
-    if (productIndex === -1) {
-        return res.status(404).send('Producto no encontrado');
+    try {
+        const product = await ProductDao.getById(pid)
+        if(!product) return res.json({status: error, message: `product id ${pid} not found` })
+        res.json({ status: "ok" , payload: product })
+    } catch (error) {
+        console.log(error)
     }
-
-    products.splice(productIndex, 1);
-    writeProducts(products);
-
-    res.status(200).send('Producto eliminado');
-});
-
-
-router.get('/:pid', (req, res) => {
-    const { pid } = req.params;
-
-    const products = readProducts();
-    const product = products.find(p => p.id === parseInt(pid));
-
-    if (!product) {
-        return res.status(404).send('Producto no encontrado');
-    }
-
-    res.json(product);
 });
 
 export default router
