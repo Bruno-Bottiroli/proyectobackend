@@ -7,7 +7,7 @@ class cartDao{
     }
 
     async getById(id){
-        return await cartModel.findById(id).lean(false)
+        return await cartModel.findById(id).populate("products.product")
     }
     
     async create(data){
@@ -15,7 +15,7 @@ class cartDao{
     }
 
     async update(id, data){
-        return await cartModel.findByIdAndUpdate(id, data, {new: true})
+        return await cartModel.findByIdAndUpdate(id, data, {new: true}).populate('products.product')
     }
 
     async addProduct(cid, pid) {
@@ -33,7 +33,7 @@ class cartDao{
             cart.products.push({ product: pid, quantity: 1 })
         }
         
-        return await cartModel.findByIdAndUpdate(cid, { products: cart.products }, { new: true })
+        return await cartModel.findByIdAndUpdate(cid, { products: cart.products }, { new: true }).populate('products.product')
     }
     
 
@@ -45,7 +45,7 @@ class cartDao{
         const cart = await cartModel.findById(cid)
         const productFilter = cart.products.filter(product => product.product != pid)
 
-        return await cartModel.findByIdAndUpdate(cid, {products: productFilter}, {new: true})
+        return await cartModel.findByIdAndUpdate(cid, {products: productFilter}, {new: true}).populate('products.product')
     }
 
     async updateProductInCart(cid, pid, quantity) {
@@ -61,7 +61,7 @@ class cartDao{
         }
         productInCart.quantity = quantity
     
-        return await cartModel.findByIdAndUpdate(cid, { products: cart.products }, { new: true })
+        return await cartModel.findByIdAndUpdate(cid, { products: cart.products }, { new: true }).populate('products.product')
     }
     async deleteProductsInCart(cid){
         return await cartModel.findByIdAndUpdate(cid, {products: []}, {new: true})
